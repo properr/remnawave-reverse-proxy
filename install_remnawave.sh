@@ -107,34 +107,15 @@ validate_downloaded_file() {
 }
 
 load_language() {
-    if [ -f "$LANG_FILE" ]; then
-        local saved_lang=$(cat "$LANG_FILE")
-        case $saved_lang in
-            1) set_language en ;;
-            2) set_language ru ;;
-            *)
-                rm -f "$LANG_FILE"
-                return 1 ;;
-        esac
-        return 0
-    fi
-    return 1
+    set_language ru
+    return 0
 }
 
-# Language variables
+# Language variables (Russian only)
 declare -gA LANG=(
-    [CHOOSE_LANG]="Select language:"
-    [LANG_EN]="English"
     [LANG_RU]="Русский"
 )
 
-show_language() {
-    echo -e "${COLOR_GREEN}${LANG[CHOOSE_LANG]}${COLOR_RESET}"
-    echo -e ""
-    echo -e "${COLOR_YELLOW}1. ${LANG[LANG_EN]}${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}2. ${LANG[LANG_RU]}${COLOR_RESET}"
-    echo -e ""
-}
 
 set_language() {
      local lang="$1"
@@ -162,19 +143,19 @@ set_language() {
      if [ -f "$lang_file" ]; then
          source "$lang_file"
      else
-         # Emergency fallback: download English from mirrors
-         local en_url="${LANG_BASE_URL}/en.sh"
-         local temp_en_file="${DIR_REMNAWAVE}lang/en_temp.sh"
+         # Emergency fallback: download Russian from mirrors
+         local ru_url="${LANG_BASE_URL}/ru.sh"
+         local temp_ru_file="${DIR_REMNAWAVE}lang/ru_temp.sh"
          
-         if download_with_mirrors "$en_url" "$temp_en_file" "lang"; then
-             source "$temp_en_file"
-             mv "$temp_en_file" "${DIR_REMNAWAVE}lang/en.sh"
+         if download_with_mirrors "$ru_url" "$temp_ru_file" "lang"; then
+             source "$temp_ru_file"
+             mv "$temp_ru_file" "${DIR_REMNAWAVE}lang/ru.sh"
          else
              # Last resort: direct download
              if command -v curl &> /dev/null; then
-                 source <(curl -sL "$en_url" 2>/dev/null)
+                 source <(curl -sL "$ru_url" 2>/dev/null)
              elif command -v wget &> /dev/null; then
-                 source <(wget -qO- "$en_url" 2>/dev/null)
+                 source <(wget -qO- "$ru_url" 2>/dev/null)
              fi
          fi
      fi
@@ -244,13 +225,7 @@ update_remnawave_reverse() {
 
     mkdir -p "${DIR_REMNAWAVE}"
 
-    local current_lang="en"
-    if [ -f "$LANG_FILE" ]; then
-        case $(cat "$LANG_FILE") in
-            1) current_lang="en" ;;
-            2) current_lang="ru" ;;
-        esac
-    fi
+    local current_lang="ru"
 
 	#Update LANG
     echo -e "${COLOR_YELLOW}${LANG[UPDATING_LANG_FILES]}${COLOR_RESET}"
@@ -2336,16 +2311,8 @@ load_selfsteal_templates_module() { load_module "selfsteal_templates" "modules" 
 
 log_entry
 
-if ! load_language; then
-    show_language
-    reading "Choose option (1-2):" LANG_OPTION
-
-    case $LANG_OPTION in
-        1) set_language en; echo "1" > "$LANG_FILE" ;;
-        2) set_language ru; echo "2" > "$LANG_FILE" ;;
-        *) error "Invalid choice. Please select 1-2." ;;
-    esac
-fi
+# Only Russian language is supported — load it directly without a chooser
+set_language ru
 
 check_root
 check_os
