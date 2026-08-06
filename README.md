@@ -1,10 +1,6 @@
-<p aling="center"><a href="https://github.com/properr/remnawave-reverse-proxy">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="./media/logo.png" />
-   <source media="(prefers-color-scheme: light)" srcset="./media/logo-black.png" />
-   <img alt="Remnawave Reverse Proxy" src="https://github.com/properr/remnawave-reverse-proxy" />
- </picture>
-</a></p>
+<p align="center">
+  <img src="./media/logo.jpg" alt="Remnawave Reverse Proxy" />
+</p>
 
 <p align="center">
   <img src="./media/ru.png" alt="Русский" /> <strong>Русский</strong>
@@ -176,7 +172,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/properr/remnawave-reverse-prox
 ```
 
 <p align="center">
-  <img src="./media/remnawave-reverse-proxy.jpg" alt="Интерфейс установки" />
+  <img src="./media/remnawave-reverse-proxy.png" alt="Интерфейс установки" />
 </p>
 
 ---
