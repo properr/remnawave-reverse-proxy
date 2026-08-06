@@ -6,10 +6,6 @@
  </picture>
 </a></p>
 
-<p align="center">
-  <img src="./media/ru.png" alt="Русский" /> <strong>Русский</strong>
-</p>
-
 ---
 
 > [!CAUTION]
