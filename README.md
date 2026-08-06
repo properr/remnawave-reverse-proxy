@@ -6,6 +6,10 @@
  </picture>
 </a></p>
 
+<p align="center">
+  <img src="./media/ru.png" alt="Русский" /> <strong>Русский</strong>
+</p>
+
 ---
 
 > [!CAUTION]
@@ -172,7 +176,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/properr/remnawave-reverse-prox
 ```
 
 <p align="center">
-  <img src="./media/remnawave-reverse-proxy.png" alt="Интерфейс установки" />
+  <img src="./media/remnawave-reverse-proxy.jpg" alt="Интерфейс установки" />
 </p>
 
 ---
