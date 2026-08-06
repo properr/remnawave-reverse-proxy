@@ -278,11 +278,11 @@ create_config_profile() {
     local name=$3
     local domain=$4
     local private_key=$5
-    local inbound_tag="${6:-Steal}"
+    local inbound_tag="${6:-GRPC}"
 
     local short_id=$(openssl rand -hex 8)
 
-    local request_body=$(jq -n --arg name "$name" --arg domain "$domain" --arg private_key "$private_key" --arg short_id "$short_id" --arg inbound_tag "$inbound_tag" '{
+    local request_body=$(jq -n --arg name "$name" --arg domain "$domain" --arg private_key "$private_key" --arg short_id "$short_id" '{
         name: $name,
         config: {
             log: { loglevel: "warning" },
@@ -291,13 +291,13 @@ create_config_profile() {
                 servers: [{ address: "https://dns.google/dns-query", skipFallback: false }]
             },
             inbounds: [{
-                tag: $inbound_tag,
+                tag: "GRPC",
                 port: 443,
                 protocol: "vless",
                 settings: { clients: [], decryption: "none" },
                 sniffing: { enabled: true, destOverride: ["http", "tls", "quic"] },
                 streamSettings: {
-                    network: "tcp",
+                    network: "grpc",
                     security: "reality",
                     realitySettings: {
                         show: false,
@@ -307,6 +307,10 @@ create_config_profile() {
                         shortIds: [$short_id],
                         privateKey: $private_key,
                         serverNames: [$domain]
+                    },
+                    grpcSettings: {
+                        serviceName: "grpc",
+                        multiMode: false
                     }
                 }
             }],
