@@ -1,5 +1,5 @@
 #!/bin/bash
-# Module: IPv6 Management
+# Модуль: управление IPv6
 
 show_ipv6_menu() {
     echo -e ""

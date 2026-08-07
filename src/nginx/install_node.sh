@@ -1,8 +1,8 @@
 #!/bin/bash
-# Module: Install Node Only
+# Модуль: установка только ноды
 
 install_node_nginx() {
-    # Load selfsteal templates module
+    # Подключаем модуль шаблонов SelfSteal
     load_selfsteal_templates_module
 
     mkdir -p /opt/remnanode && cd /opt/remnanode

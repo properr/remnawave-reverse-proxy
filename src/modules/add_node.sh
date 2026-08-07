@@ -1,7 +1,7 @@
 #!/bin/bash
-# Module: Add Node to Panel
+# Модуль: добавление ноды в панель
 
-#Add Node to Panel
+#Добавление ноды в панель
 add_node_to_panel() {
     local domain_url="127.0.0.1:3000"
 

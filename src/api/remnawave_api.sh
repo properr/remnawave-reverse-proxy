@@ -1,5 +1,5 @@
 #!/bin/bash
-# Module: Remnawave API Functions
+# Модуль: функции API Remnawave
 
 make_api_request() {
     local method=$1

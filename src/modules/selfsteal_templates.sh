@@ -1,5 +1,5 @@
 #!/bin/bash
-# Module: SelfSteal Templates
+# Модуль: шаблоны SelfSteal
 
 show_template_source_options() {
     echo -e ""
@@ -65,9 +65,9 @@ randomhtml() {
         rm -rf assets "README.md" "index.html" 2>/dev/null
     fi
 
-    # Special handling for nothing-sni - select random HTML file
+    # Особая обработка для nothing-sni — выбираем случайный HTML-файл
     if [[ "$selected_url" == *"nothing-sni"* ]]; then
-        # Randomly select one HTML file from 1-8.html
+        # Случайно выбираем один HTML-файл из 1-8.html
         selected_number=$((RANDOM % 8 + 1))
         RandomHTML="${selected_number}.html"
     else

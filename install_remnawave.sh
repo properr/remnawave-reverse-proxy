@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="26.8.7.1"
+SCRIPT_VERSION="26.8.7.2"
 UPDATE_AVAILABLE=false
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
@@ -14,13 +14,13 @@ COLOR_WHITE="\033[1;38;2;248;248;248m"
 COLOR_RED="\033[1;38;2;207;106;76m"
 COLOR_GRAY='\033[0;38;2;155;133;157m'
 
-# Download file with multiple mirrors and validation
+# Скачивание файла с нескольких зеркал и проверкой
 download_with_mirrors() {
     local file_url="$1"
     local dest_file="$2"
     local file_type="${3:-script}"  # script, lang, module
     
-    # Mirror URLs (GitHub raw content proxies)
+    # URL зеркал (прокси для raw-контента GitHub)
     local mirrors=(
         "$file_url"
         "https://cdn.jsdelivr.net/gh/properr/remnawave-reverse-proxy@main/${file_url#*main/}"
@@ -32,12 +32,12 @@ download_with_mirrors() {
     local download_success=false
     local http_code=""
     
-    # Try each mirror
+    # Пробуем каждое зеркало
     for mirror_url in "${mirrors[@]}"; do
         if command -v curl &> /dev/null; then
             http_code=$(curl -sL -w "%{http_code}" --connect-timeout 10 --max-time 30 "$mirror_url" -o "$temp_file" 2>/dev/null)
             if [ "$http_code" = "200" ] && [ -s "$temp_file" ]; then
-                # Validate file content
+                # Проверяем содержимое файла
                 if validate_downloaded_file "$temp_file" "$file_type"; then
                     download_success=true
                     break
@@ -66,7 +66,7 @@ download_with_mirrors() {
     fi
 }
 
-# Validate downloaded file content
+# Проверка содержимого скачанного файла
 validate_downloaded_file() {
     local file="$1"
     local file_type="$2"
@@ -75,7 +75,7 @@ validate_downloaded_file() {
         return 1
     fi
     
-    # Check for HTTP error responses or rate limit errors
+    # Проверка на HTTP-ошибки и ошибки rate limit
     if grep -q "429" "$file" && grep -q "Too Many Requests" "$file"; then
         return 1
     fi
@@ -84,19 +84,19 @@ validate_downloaded_file() {
         return 1
     fi
     
-    # Check for Terms of Service warnings (GitHub scraping warning)
+    # Проверка предупреждений Terms of Service (предупреждение GitHub о скрейпинге)
     if grep -q "Terms of Service" "$file" && grep -q "scraping" "$file"; then
         return 1
     fi
     
-    # For bash scripts, check for proper shebang
+    # Для bash-скриптов проверяем корректный shebang
     if [[ "$file_type" == "script" ]] || [[ "$file_type" == "lang" ]] || [[ "$file_type" == "module" ]]; then
         if ! head -1 "$file" | grep -q "^#!/bin/bash"; then
             return 1
         fi
     fi
     
-    # For language files, check for LANG array declaration
+    # Для языковых файлов проверяем объявление массива LANG
     if [ "$file_type" = "lang" ]; then
         if ! grep -q "declare -gA LANG" "$file"; then
             return 1
@@ -111,7 +111,7 @@ load_language() {
     return 0
 }
 
-# Language variables (Russian only)
+# Языковые переменные (только русский)
 declare -gA LANG=(
     [LANG_RU]="Русский"
 )
@@ -129,9 +129,9 @@ set_language() {
          local lang_url="${LANG_BASE_URL}/${lang}.sh"
          mkdir -p "${DIR_REMNAWAVE}lang"
          
-         # Use download_with_mirrors for reliable download
+         # Используем download_with_mirrors для надёжного скачивания
          if ! download_with_mirrors "$lang_url" "$lang_file" "lang"; then
-             # Fallback: try direct download if mirrors fail
+             # Запасной вариант: прямое скачивание, если зеркала не сработали
              if command -v curl &> /dev/null; then
                  curl -sL "$lang_url" -o "$lang_file" 2>/dev/null
              elif command -v wget &> /dev/null; then
@@ -143,7 +143,7 @@ set_language() {
      if [ -f "$lang_file" ]; then
          source "$lang_file"
      else
-         # Emergency fallback: download Russian from mirrors
+         # Аварийный запасной вариант: скачиваем русский язык с зеркал
          local ru_url="${LANG_BASE_URL}/ru.sh"
          local temp_ru_file="${DIR_REMNAWAVE}lang/ru_temp.sh"
          
@@ -151,7 +151,7 @@ set_language() {
              source "$temp_ru_file"
              mv "$temp_ru_file" "${DIR_REMNAWAVE}lang/ru.sh"
          else
-             # Last resort: direct download
+             # Крайний случай: прямое скачивание
              if command -v curl &> /dev/null; then
                  source <(curl -sL "$ru_url" 2>/dev/null)
              elif command -v wget &> /dev/null; then
@@ -231,16 +231,16 @@ update_remnawave_reverse() {
 
     local current_lang="ru"
 
-	#Update LANG
+	#Обновление LANG
     echo -e "${COLOR_YELLOW}${LANG[UPDATING_LANG_FILES]}${COLOR_RESET}"
     set_language "$current_lang" "true"  # force_update=true
     printf "${COLOR_GREEN}${LANG[LANG_FILE_UPDATED]}${COLOR_RESET}\n" "${current_lang}.sh"
     echo -e ""
 
-	#Update modules
+	#Обновление модулей
     echo -e "${COLOR_YELLOW}${LANG[UPDATING_MODULES]}${COLOR_RESET}"
 
-    # Nginx modules
+    # Nginx-модули
     local nginx_modules=("install_panel_node" "install_panel" "install_node")
     for module in "${nginx_modules[@]}"; do
         local module_file="${DIR_REMNAWAVE}nginx/${module}.sh"
@@ -253,7 +253,7 @@ update_remnawave_reverse() {
         fi
     done
 
-    # Modules (common)
+    # Модули (общие)
     local common_modules=("add_node" "manage_panel" "warp" "ipv6" "selfsteal_templates")
     for module in "${common_modules[@]}"; do
         local module_file="${DIR_REMNAWAVE}modules/${module}.sh"
@@ -266,7 +266,7 @@ update_remnawave_reverse() {
         fi
     done
 
-    # Caddy modules
+    # Caddy-модули
     local caddy_modules=("install_panel_node" "install_panel" "install_node")
     for module in "${caddy_modules[@]}"; do
         local module_file="${DIR_REMNAWAVE}caddy/${module}.sh"
@@ -292,7 +292,7 @@ update_remnawave_reverse() {
 
     local temp_script="${DIR_REMNAWAVE}remnawave_reverse.tmp"
     
-    # Use download_with_mirrors for reliable script download
+    # Используем download_with_mirrors для надёжного скачивания скрипта
     if download_with_mirrors "$SCRIPT_URL" "$temp_script" "script"; then
         local downloaded_version=$(grep -m 1 "SCRIPT_VERSION=" "$temp_script" | sed -E 's/.*SCRIPT_VERSION="([^"]+)".*/\1/')
         if [ "$downloaded_version" != "$remote_version" ]; then
@@ -320,7 +320,7 @@ update_remnawave_reverse() {
         echo -e "${COLOR_YELLOW}${LANG[RELAUNCH_CMD]}${COLOR_GREEN} remnawave_reverse${COLOR_RESET}"
         exit 0
     else
-        # Fallback: try direct download with wget
+        # Запасной вариант: прямое скачивание через wget
         if wget -q -O "$temp_script" "$SCRIPT_URL" 2>/dev/null; then
             local downloaded_version=$(grep -m 1 "SCRIPT_VERSION=" "$temp_script" | sed -E 's/.*SCRIPT_VERSION="([^"]+)".*/\1/')
             if [ "$downloaded_version" != "$remote_version" ]; then
@@ -425,9 +425,9 @@ install_script_if_missing() {
     if [ ! -f "${DIR_REMNAWAVE}remnawave_reverse" ] || [ ! -f "/usr/local/bin/remnawave_reverse" ]; then
         mkdir -p "${DIR_REMNAWAVE}"
         
-        # Use download_with_mirrors for reliable download
+        # Используем download_with_mirrors для надёжного скачивания
         if ! download_with_mirrors "$SCRIPT_URL" "${DIR_REMNAWAVE}remnawave_reverse" "script"; then
-            # Fallback: try direct download
+            # Запасной вариант: прямое скачивание
             if ! wget -q -O "${DIR_REMNAWAVE}remnawave_reverse" "$SCRIPT_URL" 2>/dev/null; then
                 exit 1
             fi
@@ -481,7 +481,7 @@ generate_password() {
     echo "$password"
 }
 
-#Displaying the availability of the update in the menu
+#Отображение наличия обновления в меню
 check_update_status() {
     local TEMP_REMOTE_VERSION_FILE
     TEMP_REMOTE_VERSION_FILE=$(mktemp)
@@ -566,7 +566,7 @@ show_menu() {
     echo -e ""
 }
 
-# Web server selection
+# Выбор веб-сервера
 show_webserver_select() {
     clear_screen
     echo -e ""
@@ -580,7 +580,7 @@ show_webserver_select() {
     reading "${LANG[SELECT_WEBSERVER_PROMPT]}" WEBSERVER_OPTION
 }
 
-#Manage Install Remnawave Components
+#Управление установкой компонентов Remnawave
 show_install_menu() {
     clear_screen
     echo -e ""
@@ -761,9 +761,9 @@ manage_install() {
             ;;
     esac
 }
-#Manage Install Remnawave Components
+#Управление установкой компонентов Remnawave
 
-#Show Reinstall Options
+#Показать варианты переустановки
 show_reinstall_options() {
     echo -e ""
     echo -e "${COLOR_GREEN}${LANG[REINSTALL_TYPE_TITLE]}${COLOR_RESET}"
@@ -846,9 +846,9 @@ reinstall_remnawave() {
     docker system prune -a --volumes -f > /dev/null 2>&1 &
     spinner $! "${LANG[WAITING]}"
 }
-#Show Reinstall Options
+#Показать варианты переустановки
 
-#Extensions by legiz
+#Расширения от legiz
 show_custom_legiz_menu() {
     echo -e ""
     echo -e "${COLOR_GREEN}${LANG[MENU_5]}${COLOR_RESET}"
@@ -1116,7 +1116,7 @@ edit_branding() {
     local config_file="$1"
     local needs_restart=false
     
-    # Check if branding exists
+    # Проверяем, существует ли брендинг
     if jq -e '.config.branding' "$config_file" > /dev/null 2>&1; then
         echo -e ""
         echo -e "${COLOR_GREEN}${LANG[BRANDING_CURRENT_VALUES]}${COLOR_RESET}"
@@ -1176,12 +1176,12 @@ edit_branding() {
             ;;
     esac
     
-    # Restart container if changes were made
+    # Перезапускаем контейнер, если были изменения
     if [ "$needs_restart" = true ]; then
         echo -e ""
         echo -e "${COLOR_GREEN}${LANG[BRANDING_ADDED_SUCCESS]}${COLOR_RESET}"
         
-        # Restart subscription page container
+        # Перезапускаем контейнер страницы подписок
         cd /opt/remnawave || return 1
         docker compose down remnawave-subscription-page > /dev/null 2>&1 &
         spinner $! "${LANG[WAITING]}"
@@ -1193,7 +1193,7 @@ edit_branding() {
 delete_applications() {
     local config_file="$1"
     
-    # Get platforms with non-empty arrays
+    # Получаем платформы с непустыми массивами
     local platforms=$(jq -r '.platforms | to_entries[] | select(.value | length > 0) | .key' "$config_file" 2>/dev/null)
     
     if [ -z "$platforms" ]; then
@@ -1233,7 +1233,7 @@ delete_applications() {
     
     local selected_platform=${platform_map[$PLATFORM_OPTION]}
     
-    # Get applications from selected platform
+    # Получаем приложения выбранной платформы
     local apps=$(jq -r --arg platform "$selected_platform" '.platforms[$platform][] | .name // .id' "$config_file" 2>/dev/null)
     
     if [ -z "$apps" ]; then
@@ -1277,14 +1277,14 @@ delete_applications() {
     read confirm
     
     if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
-        # Remove the application from the platform array
+        # Удаляем приложение из массива платформы
         jq --arg platform "$selected_platform" --arg app_name "$selected_app" '
         .platforms[$platform] = [.platforms[$platform][] | select((.name // .id) != $app_name)]
         ' "$config_file" > "${config_file}.tmp" && mv "${config_file}.tmp" "$config_file"
         
         echo -e "${COLOR_GREEN}${LANG[APP_DELETED_SUCCESS]}${COLOR_RESET}"
         
-        # Restart subscription page container
+        # Перезапускаем контейнер страницы подписок
         cd /opt/remnawave || return 1
         docker compose down remnawave-subscription-page > /dev/null 2>&1 &
         spinner $! "${LANG[WAITING]}"
@@ -1294,7 +1294,7 @@ delete_applications() {
         echo -e "${COLOR_YELLOW}${LANG[EXIT]}${COLOR_RESET}"
     fi
 }
-#Extensions by legiz
+#Расширения от legiz
 
 add_cron_rule() {
     local rule="$1"
@@ -1335,7 +1335,7 @@ spinner() {
   printf "\r\033[K" > /dev/tty
 }
 
-#Extensions by legiz
+#Расширения от legiz
 show_custom_legiz_menu() {
     echo -e ""
     echo -e "${COLOR_GREEN}${LANG[MENU_5]}${COLOR_RESET}"
@@ -1636,7 +1636,7 @@ get_certificates() {
 
     case $CERT_METHOD in
         1)
-            # Cloudflare API (DNS-01 support wildcard)
+            # Cloudflare API (DNS-01, поддержка wildcard)
             reading "${LANG[ENTER_CF_TOKEN]}" CLOUDFLARE_API_KEY
             reading "${LANG[ENTER_CF_EMAIL]}" CLOUDFLARE_EMAIL
 
@@ -1668,7 +1668,7 @@ EOL
                 --elliptic-curve secp384r1
             ;;
         2)
-            # ACME HTTP-01 (without wildcard)
+            # ACME HTTP-01 (без wildcard)
             ufw allow 80/tcp comment 'HTTP for ACME challenge' > /dev/null 2>&1
 
             certbot certonly \
@@ -1738,7 +1738,7 @@ EOL
     fi
 }
 
-#Manage Certificates
+#Управление сертификатами
 show_manage_certificates() {
     echo -e ""
     echo -e "${COLOR_GREEN}${LANG[MENU_8]}${COLOR_RESET}"
@@ -2082,7 +2082,7 @@ fix_letsencrypt_structure() {
     chmod 600 "$live_dir/privkey.pem"
     return 0
 }
-#Manage Certificates
+#Управление сертификатами
 
 handle_certificates() {
     local -n domains_to_check_ref=$1
@@ -2244,7 +2244,7 @@ handle_certificates() {
     done
 }
 
-# Module loader
+# Загрузчик модулей
 load_module() {
     local module_name="$1"
     local module_type="${2:-modules}"
@@ -2260,7 +2260,7 @@ load_module() {
             cp "$module_file" "$backup_file"
         fi
 
-        # Use download_with_mirrors for reliable download
+        # Используем download_with_mirrors для надёжного скачивания
         if download_with_mirrors "$module_url" "$module_file" "module"; then
             rm -f "$backup_file"
         else
@@ -2301,7 +2301,7 @@ load_module() {
     fi
 }
 
-# Module loaders (wrappers for load_module)
+# Загрузчики модулей (обёртки для load_module)
 load_install_panel_node_module() { load_module "install_panel_node" "nginx" "${1:-false}"; }
 load_install_panel_module() { load_module "install_panel" "nginx" "${1:-false}"; }
 load_install_node_module() { load_module "install_node" "nginx" "${1:-false}"; }
@@ -2317,7 +2317,7 @@ load_selfsteal_templates_module() { load_module "selfsteal_templates" "modules" 
 
 log_entry
 
-# Only Russian language is supported — load it directly without a chooser
+# Поддерживается только русский язык — подключаем его напрямую без выбора
 set_language ru
 
 check_root

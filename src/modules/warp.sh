@@ -1,5 +1,5 @@
 #!/bin/bash
-# Module: WARP Native
+# Модуль: WARP Native
 
 manage_warp_native() {
     echo -e ""

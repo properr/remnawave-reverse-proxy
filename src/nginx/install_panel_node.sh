@@ -1,8 +1,8 @@
 #!/bin/bash
-# Module: Install Panel + Node
+# Модуль: установка панели + ноды
 
 install_panel_node_nginx() {
-    # Load selfsteal templates module
+    # Подключаем модуль шаблонов SelfSteal
     load_selfsteal_templates_module
 
     mkdir -p /opt/remnawave && cd /opt/remnawave
@@ -57,23 +57,23 @@ install_panel_node_nginx() {
     JWT_API_TOKENS_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 64)
 
     cat > .env <<EOL
-### APP ###
+### ПРИЛОЖЕНИЕ ###
 APP_PORT=3000
 METRICS_PORT=3001
 
 ### API ###
-# Possible values: max (start instances on all cores), number (start instances on number of cores), -1 (start instances on all cores - 1)
-# !!! Do not set this value more than physical cores count in your machine !!!
-# Review documentation: https://remna.st/docs/install/environment-variables#scaling-api
+# Возможные значения: max (инстансы на всех ядрах), number (инстансы на указанном числе ядер), -1 (инстансы на всех ядрах - 1)
+# !!! Не устанавливайте значение больше числа физических ядер вашей машины !!!
+# Документация: https://remna.st/docs/install/environment-variables#scaling-api
 API_INSTANCES=1
 
-### DATABASE ###
-# FORMAT: postgresql://{user}:{password}@{host}:{port}/{database}
+### БАЗА ДАННЫХ ###
+# ФОРМАТ: postgresql://{user}:{password}@{host}:{port}/{database}
 DATABASE_URL="postgresql://postgres:postgres@remnawave-db:5432/postgres"
 
 ### REDIS ###
 REDIS_SOCKET=/var/run/valkey/valkey.sock
-# Alternative to REDIS_SOCKET
+# Альтернатива REDIS_SOCKET
 #REDIS_HOST=
 #REDIS_PORT=
 
@@ -81,38 +81,38 @@ REDIS_SOCKET=/var/run/valkey/valkey.sock
 JWT_AUTH_SECRET=$JWT_AUTH_SECRET
 JWT_API_TOKENS_SECRET=$JWT_API_TOKENS_SECRET
 
-# Set the session idle timeout in the panel to avoid daily logins.
-# Value in hours: 12–168
+# Таймаут простоя сессии в панели, чтобы не логиниться каждый день.
+# Значение в часах: 12–168
 JWT_AUTH_LIFETIME=168
 
-### TELEGRAM NOTIFICATIONS ###
+### УВЕДОМЛЕНИЯ TELEGRAM ###
 IS_TELEGRAM_NOTIFICATIONS_ENABLED=false
 TELEGRAM_BOT_TOKEN=change_me
-# is optional, only if you want to use proxy
-# FORMAT: protocol://user:password@host:port, example: socks5://proxy:1080
+# необязательно, только если нужен прокси
+# ФОРМАТ: protocol://user:password@host:port, пример: socks5://proxy:1080
 # TELEGRAM_BOT_PROXY=change_me
 
-### TELEGRAM CHAT IDs in format: "chat_id:thread_id"
-# thread_id is optional, only if you want to use topics
-# example: "-100123:80" - -100123 is chat_id, 80 is thread_id
-# example: "-100123" - -100123 is chat_id, thread_id is not used
+### TELEGRAM CHAT ID в формате: "chat_id:thread_id"
+# thread_id необязателен, только если нужны топики
+# пример: "-100123:80" — -100123 это chat_id, 80 это thread_id
+# пример: "-100123" — -100123 это chat_id, thread_id не используется
 TELEGRAM_NOTIFY_USERS=change_me
 TELEGRAM_NOTIFY_NODES=change_me
 TELEGRAM_NOTIFY_CRM=change_me
 TELEGRAM_NOTIFY_SERVICE=change_me
 TELEGRAM_NOTIFY_TBLOCKER=change_me
 
-### FRONT_END ###
-# Used by CORS, you can leave it as * or place your domain there
+### ФРОНТЕНД ###
+# Используется CORS: можно оставить * или указать ваш домен
 FRONT_END_DOMAIN=$PANEL_DOMAIN
 
-### SUBSCRIPTION PUBLIC DOMAIN ###
-### DOMAIN, WITHOUT HTTP/HTTPS, DO NOT ADD / AT THE END ###
-### Used in "profile-web-page-url" response header and in UI/API ###
-### Review documentation: https://remna.st/docs/install/environment-variables#domains
+### ПУБЛИЧНЫЙ ДОМЕН ПОДПИСОК ###
+### ДОМЕН, БЕЗ HTTP/HTTPS, БЕЗ СЛЭША / В КОНЦЕ ###
+### Используется в заголовке ответа "profile-web-page-url" и в UI/API ###
+### Документация: https://remna.st/docs/install/environment-variables#domains
 SUB_PUBLIC_DOMAIN=$SUB_DOMAIN
 
-### If CUSTOM_SUB_PREFIX is set in @remnawave/subscription-page, append the same path to SUB_PUBLIC_DOMAIN. Example: SUB_PUBLIC_DOMAIN=sub-page.example.com/sub ###
+### Если CUSTOM_SUB_PREFIX задан в @remnawave/subscription-page, добавьте тот же путь к SUB_PUBLIC_DOMAIN. Пример: SUB_PUBLIC_DOMAIN=sub-page.example.com/sub ###
 
 ### SWAGGER ###
 SWAGGER_PATH=/docs
@@ -120,38 +120,38 @@ SCALAR_PATH=/scalar
 IS_DOCS_ENABLED=false
 
 ### PROMETHEUS ###
-### Metrics are available at http://127.0.0.1:METRICS_PORT/metrics
+### Метрики доступны по адресу http://127.0.0.1:METRICS_PORT/metrics
 METRICS_USER=$METRICS_USER
 METRICS_PASS=$METRICS_PASS
 
-### Webhook configuration
-### Enable webhook notifications (true/false, defaults to false if not set or empty)
+### Конфигурация вебхука
+### Включить вебхук-уведомления (true/false, по умолчанию false, если не задано или пусто)
 WEBHOOK_ENABLED=false
-### Webhook URL to send notifications to (can specify multiple URLs separated by commas if needed)
-### Only http:// or https:// are allowed.
+### URL вебхука для отправки уведомлений (можно указать несколько URL через запятую)
+### Разрешены только http:// или https://.
 WEBHOOK_URL=https://your-webhook-url.com/endpoint
-### This secret is used to sign the webhook payload, must be exact 64 characters. Only a-z, 0-9, A-Z are allowed.
+### Этот секрет используется для подписи payload вебхука, должен быть ровно 64 символа. Разрешены только a-z, 0-9, A-Z.
 WEBHOOK_SECRET_HEADER=vsmu67Kmg6R8FjIOF1WUY8LWBHie4scdEqrfsKmyf4IAf8dY3nFS0wwYHkhh6ZvQ
 
-### Bandwidth usage reached notifications
+### Уведомления о достижении лимита трафика
 BANDWIDTH_USAGE_NOTIFICATIONS_ENABLED=false
-# Only in ASC order (example: [60, 80]), must be valid array of integer(min: 25, max: 95) numbers. No more than 5 values.
+# Только в порядке возрастания (пример: [60, 80]), массив целых чисел (мин: 25, макс: 95). Не более 5 значений.
 BANDWIDTH_USAGE_NOTIFICATIONS_THRESHOLD=[60, 80]
 
-### Not connected users notification (webhook, telegram)
+### Уведомление о неподключившихся пользователях (webhook, telegram)
 NOT_CONNECTED_USERS_NOTIFICATIONS_ENABLED=false
-# Only in ASC order (example: [6, 12, 24]), must be valid array of integer(min: 1, max: 168) numbers. No more than 3 values.
-# Each value represents HOURS passed after user creation (user.createdAt)
+# Только в порядке возрастания (пример: [6, 12, 24]), массив целых чисел (мин: 1, макс: 168). Не более 3 значений.
+# Каждое значение — часы, прошедшие после создания пользователя (user.createdAt)
 NOT_CONNECTED_USERS_NOTIFICATIONS_AFTER_HOURS=[6, 24, 48]
 
 ### CLOUDFLARE ###
-# USED ONLY FOR docker-compose-prod-with-cf.yml
-# NOT USED BY THE APP ITSELF
+# ИСПОЛЬЗУЕТСЯ ТОЛЬКО ДЛЯ docker-compose-prod-with-cf.yml
+# НЕ ИСПОЛЬЗУЕТСЯ САМИМ ПРИЛОЖЕНИЕМ
 CLOUDFLARE_TOKEN=ey...
 
-### Database ###
-### For Postgres Docker container ###
-# NOT USED BY THE APP ITSELF
+### База данных ###
+### Для Postgres Docker-контейнера ###
+# НЕ ИСПОЛЬЗУЕТСЯ САМИМ ПРИЛОЖЕНИЕМ
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=postgres
@@ -429,7 +429,7 @@ server {
         index index.html;
     }
 
-    # OAuth2 Telegram login
+    # Вход через OAuth2 Telegram
     location ^~ /oauth2/ {
         
         if (\$http_referer !~ "^https://oauth\.telegram\.org/") {
@@ -536,50 +536,50 @@ EOL
         sleep 60
     done
 
-    # Register Remnawave
+    # Регистрируем Remnawave
     local token=$(register_remnawave "$domain_url" "$SUPERADMIN_USERNAME" "$SUPERADMIN_PASSWORD")
     echo -e "${COLOR_GREEN}${LANG[REGISTRATION_SUCCESS]}${COLOR_RESET}"
 
-    # Get public key
+    # Получаем публичный ключ
     echo -e "${COLOR_YELLOW}${LANG[GET_PUBLIC_KEY]}${COLOR_RESET}"
     sleep 1
     get_public_key "$domain_url" "$token" "$target_dir"
 
-    # Generate Xray keys
+    # Генерируем Xray-ключи
     echo -e "${COLOR_YELLOW}${LANG[GENERATE_KEYS]}${COLOR_RESET}"
     sleep 1
     local private_key=$(generate_xray_keys "$domain_url" "$token")
     printf "${COLOR_GREEN}${LANG[GENERATE_KEYS_SUCCESS]}${COLOR_RESET}\n"
 
-    # Delete default config profile
+    # Удаляем профиль конфигурации по умолчанию
     delete_config_profile "$domain_url" "$token"
 
-    # Create config profile
+    # Создаём профиль конфигурации
     echo -e "${COLOR_YELLOW}${LANG[CREATING_CONFIG_PROFILE]}${COLOR_RESET}"
     read config_profile_uuid inbound_uuid <<< $(create_config_profile "$domain_url" "$token" "StealConfig" "$SELFSTEAL_DOMAIN" "$private_key")
     echo -e "${COLOR_GREEN}${LANG[CONFIG_PROFILE_CREATED]}${COLOR_RESET}"
 
-    # Create node with config profile binding
+    # Создаём ноду с привязкой профиля конфигурации
     echo -e "${COLOR_YELLOW}${LANG[CREATING_NODE]}${COLOR_RESET}"
     create_node "$domain_url" "$token" "$config_profile_uuid" "$inbound_uuid"
 
-    # Create host
+    # Создаём хост
     echo -e "${COLOR_YELLOW}${LANG[CREATE_HOST]}${COLOR_RESET}"
     create_host "$domain_url" "$token" "$inbound_uuid" "$SELFSTEAL_DOMAIN" "$config_profile_uuid"
 
-    # Get UUID default squad
+    # Получаем UUID стандартного отряда (squad)
     echo -e "${COLOR_YELLOW}${LANG[GET_DEFAULT_SQUAD]}${COLOR_RESET}"
     local squad_uuid=$(get_default_squad "$domain_url" "$token")
 
-    # Update squad
+    # Обновляем отряд (squad)
     update_squad "$domain_url" "$token" "$squad_uuid" "$inbound_uuid"
     echo -e "${COLOR_GREEN}${LANG[UPDATE_SQUAD]}${COLOR_RESET}"
 
-    # Create API token for subscription page
+    # Создаём API-токен для страницы подписок
     echo -e "${COLOR_YELLOW}${LANG[CREATING_API_TOKEN]}${COLOR_RESET}"
     create_api_token "$domain_url" "$token" "$target_dir"
 
-    # Stop and start Remnawave
+    # Останавливаем и запускаем Remnawave
     echo -e "${COLOR_YELLOW}${LANG[STOPPING_REMNAWAVE]}${COLOR_RESET}"
     sleep 1
     docker compose down > /dev/null 2>&1 &
