@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="26.8.7.2"
+SCRIPT_VERSION="26.8.7.3"
 UPDATE_AVAILABLE=false
 DIR_REMNAWAVE="/usr/local/remnawave_reverse/"
 LANG_FILE="${DIR_REMNAWAVE}selected_language"
@@ -422,7 +422,26 @@ remove_script() {
 }
 
 install_script_if_missing() {
+    local need_install=false
+
     if [ ! -f "${DIR_REMNAWAVE}remnawave_reverse" ] || [ ! -f "/usr/local/bin/remnawave_reverse" ]; then
+        need_install=true
+    else
+        # Проверяем установленную копию: своя ли она и актуальная ли
+        local installed_version
+        installed_version=$(grep -m 1 "SCRIPT_VERSION=" "${DIR_REMNAWAVE}remnawave_reverse" 2>/dev/null | sed -E 's/.*SCRIPT_VERSION="([^"]+)".*/\1/')
+        local installed_url
+        installed_url=$(grep -m 1 "SCRIPT_URL=" "${DIR_REMNAWAVE}remnawave_reverse" 2>/dev/null | sed -E 's/.*SCRIPT_URL="([^"]+)".*/\1/')
+        local remote_version
+        remote_version=$(curl -s --max-time 15 "$SCRIPT_URL" 2>/dev/null | grep -m 1 "SCRIPT_VERSION=" | sed -E 's/.*SCRIPT_VERSION="([^"]+)".*/\1/')
+
+        # Копия чужая (не из нашего репозитория) или устарела — переустанавливаем
+        if [ -n "$remote_version" ] && { [ -z "$installed_version" ] || [ "$installed_version" != "$remote_version" ] || [ "$installed_url" != "$SCRIPT_URL" ]; }; then
+            need_install=true
+        fi
+    fi
+
+    if [ "$need_install" = true ]; then
         mkdir -p "${DIR_REMNAWAVE}"
         
         # Используем download_with_mirrors для надёжного скачивания
