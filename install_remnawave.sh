@@ -8,11 +8,11 @@ SCRIPT_URL="https://raw.githubusercontent.com/properr/remnawave-reverse-proxy/re
 LANG_BASE_URL="https://raw.githubusercontent.com/properr/remnawave-reverse-proxy/refs/heads/main/src/lang"
 
 COLOR_RESET="\033[0m"
-COLOR_GREEN="\033[1;32m"
-COLOR_YELLOW="\033[1;33m"
-COLOR_WHITE="\033[1;37m"
-COLOR_RED="\033[1;31m"
-COLOR_GRAY='\033[0;90m'
+COLOR_GREEN="\033[1;38;2;212;175;55m"
+COLOR_YELLOW="\033[1;38;2;242;193;78m"
+COLOR_WHITE="\033[1;38;2;232;227;214m"
+COLOR_RED="\033[1;38;2;229;83;75m"
+COLOR_GRAY='\033[0;38;2;156;143;110m'
 
 # Download file with multiple mirrors and validation
 download_with_mirrors() {
