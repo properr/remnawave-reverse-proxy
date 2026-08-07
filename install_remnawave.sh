@@ -190,6 +190,10 @@ log_clear() {
   sed -i -e 's/\x1b\[[0-9;]*[a-zA-Z]//g' "$LOGFILE"
 }
 
+clear_screen() {
+    printf "\033c" > /dev/tty 2>/dev/null || true
+}
+
 log_entry() {
   mkdir -p ${DIR_REMNAWAVE}
   LOGFILE="${DIR_REMNAWAVE}remnawave_reverse.log"
@@ -534,6 +538,7 @@ check_update_status() {
 }
 
 show_menu() {
+    clear_screen
     echo -e "${COLOR_GREEN}${LANG[MENU_TITLE]}${COLOR_RESET}"
     if [[ "$UPDATE_AVAILABLE" == true ]]; then
 		echo -e "${COLOR_GRAY}$(printf "${LANG[VERSION_LABEL]}" "$SCRIPT_VERSION ${COLOR_RED}${LANG[AVAILABLE_UPDATE]}${COLOR_RESET}")${COLOR_RESET}"
@@ -564,6 +569,7 @@ show_menu() {
 
 # Web server selection
 show_webserver_select() {
+    clear_screen
     echo -e ""
     echo -e "${COLOR_GREEN}${LANG[SELECT_WEBSERVER_TITLE]}${COLOR_RESET}"
     echo -e ""
@@ -577,6 +583,7 @@ show_webserver_select() {
 
 #Manage Install Remnawave Components
 show_install_menu() {
+    clear_screen
     echo -e ""
     echo -e "${COLOR_GREEN}${LANG[INSTALL_MENU_TITLE]}${COLOR_RESET}"
     echo -e ""
